@@ -17,6 +17,12 @@ export type Scene = {
   /** The button's glyph while this scene is on, drawn in a 24-unit box. */
   icon: ReactNode;
   main: string;
+  /** How the scene draws itself in when it opens a visit: the body of `vec2 enter(vec2 f, float e)`, e running
+   *  0..1, returning how much of the ink at f is down and the ink of the tool cutting it. May call main's helpers.
+   *  A scene without one is simply there. */
+  enter?: string;
+  /** How long that takes, in milliseconds: what the drawing needs to be followed. */
+  enterMs?: number;
 };
 /** A site's set of scenes. */
 export type Suite = {
@@ -41,6 +47,7 @@ uniform vec2 uCenter;   // the scene's focus, device pixels from the bottom left
 uniform float uScale;   // its radius, device pixels
 uniform float uInk1;    // line strength, set per theme so both read the same
 uniform float uWide;    // 1 on wide screens, 0 on narrow
+uniform float uEnter;   // the entrance, 0..1; 1 once the scene is all there
 out vec4 outColor;
 
 // A hairline wherever v crosses a whole number: about one device pixel wide at any zoom.
@@ -73,7 +80,17 @@ mat2 rot(float a) { return mat2(cos(a), -sin(a), sin(a), cos(a)); }
 float presence(vec2 frag) {
   return 1.0;
 }
-vec4 paint(float ink) { return vec4(mix(uPaper, uInk, clamp(ink, 0.0, 1.0)), 1.0); }
+// 1 once e has passed the moment "at" (0..1), over a front w wide: 0 everywhere at e = 0, 1 everywhere at e = 1.
+float drawn(float at, float e, float w) { return smoothstep(at, at + w, e * (1.0 + w)); }
+float tool(vec2 p, vec2 at, float r) { return 1.0 - smoothstep(r * 0.7, r, length(p - at)); }
+vec2 enter(vec2 f, float e); // the scene's own, after its main
+vec4 paint(float ink) {
+  if (uEnter < 1.0) {
+    vec2 m = enter(gl_FragCoord.xy, uEnter);
+    ink = max(ink * m.x, m.y);
+  }
+  return vec4(mix(uPaper, uInk, clamp(ink, 0.0, 1.0)), 1.0);
+}
 `;
 
 const VERTEX = `#version 300 es
@@ -140,9 +157,10 @@ function token(name: string): [number, number, number] {
 
 /**
  * Draws one scene on one canvas until the returned stop function is called. The first frame is drawn
- * before this returns, so a page that starts the background as its script loads paints with it.
+ * before this returns, so a page that starts the background as its script loads paints with it. With an
+ * entrance, the scene draws itself in first, in stronger ink that settles as the page appears.
  */
-function run(el: HTMLCanvasElement, scene: Scene, suite: Suite): () => void {
+function run(el: HTMLCanvasElement, scene: Scene, suite: Suite, entrance?: Entrance): () => void {
   const gl = el.getContext("webgl2", {
     antialias: false,
     alpha: false,
@@ -164,7 +182,8 @@ function run(el: HTMLCanvasElement, scene: Scene, suite: Suite): () => void {
   try {
     program = gl.createProgram()!;
     gl.attachShader(program, compile(gl.VERTEX_SHADER, VERTEX));
-    gl.attachShader(program, compile(gl.FRAGMENT_SHADER, HEADER + scene.main));
+    gl.attachShader(program, compile(gl.FRAGMENT_SHADER, `${HEADER}${scene.main}
+vec2 enter(vec2 f, float e) {${scene.enter ?? " return vec2(1.0, 0.0); "}}`));
     gl.linkProgram(program);
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw Error("link");
   } catch (e) {
@@ -192,16 +211,16 @@ function run(el: HTMLCanvasElement, scene: Scene, suite: Suite): () => void {
   const uCenter = u("uCenter"),
     uScale = u("uScale"),
     uInk1 = u("uInk1"),
-    uWide = u("uWide");
+    uWide = u("uWide"),
+    uEnter = u("uEnter");
 
+  let ink = 0;
   const colours = () => {
     gl.uniform3fv(uInk, token("--text"));
     gl.uniform3fv(uPaper, token("--bg"));
     // Light ink on dark paper reads stronger than dark on light at the same mix: even them out.
-    gl.uniform1f(
-      uInk1,
-      document.documentElement.dataset.theme === "dark" ? 0.13 : 0.18,
-    );
+    ink = document.documentElement.dataset.theme === "dark" ? 0.13 : 0.18;
+    gl.uniform1f(uInk1, ink);
   };
   const size = () => {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -225,6 +244,9 @@ function run(el: HTMLCanvasElement, scene: Scene, suite: Suite): () => void {
   const still = window.matchMedia("(prefers-reduced-motion: reduce)");
   let frame = 0;
   const draw = () => {
+    const { e, strength } = entrance?.now() ?? ARRIVED;
+    gl.uniform1f(uEnter, e);
+    gl.uniform1f(uInk1, ink * strength);
     gl.uniform1f(uTime, still.matches ? 12 : clock());
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     frame = still.matches || document.hidden ? 0 : requestAnimationFrame(draw);
@@ -285,6 +307,85 @@ function clock(): number {
   return (Date.now() - origin) / 1000;
 }
 
+// ------------------------------------------------------------------ the entrance
+
+type Entrance = { now: () => { e: number; strength: number } };
+const ARRIVED = { e: 1, strength: 1 };
+const ENTERED = "vibe-entered";
+/** How much stronger the ink is while the scene is being drawn. */
+const FRESH = 3.2;
+/** The page is let in by this long after the visitor asked for it (a slow load gets a quicker drawing)... */
+const BUDGET = 2350;
+/** ...and where that leaves less than this to draw in, there is no entrance: they have waited enough. */
+const SHORTEST = 1100;
+/** How far the drawing has got when the page comes in over it. */
+const CUE = 0.82;
+/** The page is never kept back longer than this, whatever its code is doing. */
+const LATEST = 4000;
+
+/** The page's own code has drawn it: #root no longer holds only what the build left there for readers without JavaScript. */
+const mounted = (root: Element) => !!root.firstElementChild && !root.firstElementChild.matches(".prerender, h1.sr-only");
+
+/**
+ * Whether this load opens a visit: the first page of the tab, drawn by its own code (a docs page is already there to
+ * read), in its own window (not a post's player card), seen, and by someone who has not asked for less motion.
+ */
+function opens(scene: Scene): boolean {
+  const root = document.getElementById("root");
+  if (!scene.enter || !root?.firstElementChild || mounted(root)) return false;
+  if (document.documentElement.classList.contains("app-terminal")) return false; // people come there to act
+  if (window.top !== window || document.hidden) return false;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
+  if ((BUDGET - performance.now()) / CUE < SHORTEST) return false;
+  try {
+    if (sessionStorage.getItem(ENTERED)) return false;
+    sessionStorage.setItem(ENTERED, "1");
+  } catch {
+    return false; // it could not be told from the next page's, and would play on every one
+  }
+  return true;
+}
+
+/**
+ * The scene draws itself in on the empty ground, then the page appears over it (style.css, html[data-entering]). The
+ * page loads underneath meanwhile, and is held only until the drawing is nearly done or the visitor does anything.
+ */
+function entranceOf(scene: Scene): Entrance {
+  const html = document.documentElement;
+  const root = document.getElementById("root")!;
+  const began = performance.now();
+  const ms = Math.min(scene.enterMs ?? 1800, (BUDGET - began) / CUE);
+  let shown = 0; // when the page was let in
+  let skipped = false;
+  html.dataset.entering = "draw";
+  const acts = ["pointerdown", "keydown", "wheel", "touchstart"] as const;
+  const letIn = () => {
+    if (shown) return;
+    shown = performance.now();
+    html.dataset.entering = "page";
+    acts.forEach((a) => window.removeEventListener(a, skip, true));
+    document.removeEventListener("visibilitychange", skip);
+    setTimeout(() => delete html.dataset.entering, 600);
+  };
+  function skip() {
+    skipped = true;
+    letIn();
+  }
+  acts.forEach((a) => window.addEventListener(a, skip, { capture: true, passive: true }));
+  document.addEventListener("visibilitychange", skip);
+  setTimeout(letIn, LATEST); // a timer, not a frame: a page that draws no frames is let in too
+  return {
+    now: () => {
+      if (skipped) return ARRIVED;
+      const t = performance.now();
+      const p = Math.min(1, (t - began) / ms);
+      if (p >= CUE && mounted(root)) letIn();
+      const settle = shown ? Math.min(1, (t - shown) / 700) : 0;
+      return { e: p < 1 ? 0.5 - 0.5 * Math.cos(Math.PI * p) : 1, strength: FRESH + (1 - FRESH) * settle * settle * (3 - 2 * settle) };
+    },
+  };
+}
+
 const started = new Set<string>();
 /**
  * Puts a suite's background behind the page and keeps it on the visitor's choice. Each site calls it
@@ -301,18 +402,19 @@ export function startVibe(suite: Suite) {
   const s = vibeStore(suite);
   let current: HTMLCanvasElement | undefined;
   let stop = () => {};
-  const show = () => {
+  const show = (first = false) => {
     const scene = suite.scenes.find((v) => v.id === s.get()) ?? suite.scenes[0];
     const el = document.createElement("canvas");
     el.className = "vibe-canvas";
     el.setAttribute("aria-hidden", "true");
     document.body.appendChild(el);
-    const stopNext = run(el, scene, suite);
+    const stopNext = run(el, scene, suite, first && opens(scene) ? entranceOf(scene) : undefined);
+    if (el.hidden) delete document.documentElement.dataset.entering; // no scene to wait for
     stop();
     current?.remove();
     current = el;
     stop = stopNext;
   };
-  show();
-  s.subscribe(show);
+  show(true);
+  s.subscribe(() => show());
 }

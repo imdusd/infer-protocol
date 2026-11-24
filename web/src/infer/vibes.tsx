@@ -57,6 +57,12 @@ void main() {
   }
   outColor = paint(ink * uInk1 * 1.2 * presence(f));
 }`,
+    enterMs: 2200,
+    enter: `
+  // A forward pass: the signal crosses the layers, and each connection is there once it has arrived.
+  vec2 q = f / uRes;
+  return vec2(drawn(clamp(0.92 * q.x + 0.08 * hash(vec2(floor(q.y * 6.0), 2.0)), 0.0, 1.0), e, 0.05), 0.0);
+`,
   },
   {
     id: "ledger",
@@ -95,6 +101,14 @@ void main() {
   ink = max(ink, fig * live * 0.9);
   outColor = paint(ink * uInk1 * presence(f));
 }`,
+    enterMs: 2400,
+    enter: `
+  // The book is ruled and entered from the top, a line at a time, left to right.
+  float rh = uRes.y / 30.0;
+  float y = f.y / rh - uTime * 0.4;
+  float line = clamp((floor(uRes.y / rh - uTime * 0.4) - floor(y)) / 31.0, 0.0, 1.0);
+  return vec2(drawn(0.72 * line + 0.28 * f.x / uRes.x, e, 0.01), 0.0);
+`,
   },
   {
     id: "tape",
@@ -145,6 +159,13 @@ void main() {
   }
   outColor = paint(ink * uInk1 * presence(f));
 }`,
+    enterMs: 2050,
+    enter: `
+  // Each tape is fed in from the side it runs from.
+  float band = floor(f.y / (uRes.y / 90.0) / 18.0), x = f.x / uRes.x;
+  float run = mod(band, 2.0) < 1.0 ? 1.0 - x : x;
+  return vec2(drawn(0.3 * hash(vec2(band, 9.0)) + 0.7 * run, e, 0.01), 0.0);
+`,
   },
   {
     id: "attention",
@@ -185,6 +206,13 @@ void main() {
   }
   outColor = paint(ink * uInk1 * presence(f));
 }`,
+    enterMs: 2200,
+    enter: `
+  // The text is read: tokens come in along each line and look back as they arrive.
+  float band = floor(f.y / (uRes.y / 4.5)), x = f.x / uRes.x;
+  float read = mod(band, 2.0) < 1.0 ? x : 1.0 - x;
+  return vec2(drawn(0.35 * (1.0 - band / 5.0) + 0.65 * read, e, 0.03), 0.0);
+`,
   },
   {
     id: "descent",
@@ -234,6 +262,12 @@ void main() {
   }
   outColor = paint(ink * uInk1 * presence(f));
 }`,
+    enterMs: 2300,
+    enter: `
+  // Down the surface: the contours appear from the rim to the minimum.
+  float level = log(L((f - uCenter) / uScale) + 0.3);
+  return vec2(drawn(clamp(1.0 - (level + 1.4) / 3.2, 0.0, 1.0), e, 0.05), 0.0);
+`,
   },
   {
     id: "diffusion",
@@ -286,6 +320,11 @@ void main() {
   }
   outColor = paint(ink * uInk1 * 0.8 * presence(f));
 }`,
+    enterMs: 2050,
+    enter: `
+  // Sampled from noise: the dots arrive in no order at all.
+  return vec2(drawn(hash(floor(f / (uRes.y / 70.0)) + 0.5), e, 0.15), 0.0);
+`,
   },
   {
     id: "softmax",
@@ -336,6 +375,12 @@ void main() {
   }
   outColor = paint(ink * uInk1 * presence(f));
 }`,
+    enterMs: 2050,
+    enter: `
+  // The logits come in: every distribution grows up from its own baseline.
+  vec2 cell = f / (vec2(0.26, 0.17) * uRes.y);
+  return vec2(drawn(0.4 * hash(floor(cell) + 0.5) + 0.6 * fract(cell.y), e, 0.04), 0.0);
+`,
   },
   {
     id: "sheet",
@@ -388,6 +433,15 @@ void main() {
   float ink = 1.0 - smoothstep(rad - 1.0, rad + 1.0, d);
   outColor = paint(ink * uInk1 * 1.4 * presence(f));
 }`,
+    enterMs: 1950,
+    enter: `
+  // Four units fire, and the sheet wakes outward from them.
+  float sp = uRes.y / 40.0;
+  vec2 w = (floor(f / sp) + 0.5) * sp / uRes;
+  vec2 k = vec2(uRes.x / uRes.y, 1.0);
+  float far = min(min(length((w - vec2(0.18, 0.72)) * k), length((w - vec2(0.46, 0.22)) * k)), min(length((w - vec2(0.7, 0.8)) * k), length((w - vec2(0.88, 0.3)) * k)));
+  return vec2(drawn(clamp(far / 0.62, 0.0, 1.0), e, 0.06), 0.0);
+`,
   },
 ];
 
