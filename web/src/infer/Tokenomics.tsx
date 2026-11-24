@@ -2,6 +2,13 @@
 import { LAUNCH, bucketAmount, compact, pct, whole } from "./config";
 import { Fig, Line, SITE, Shell, Undisclosed, WHITEPAPER, useSiteWallet } from "./ui";
 
+// Launch 1282, 11 October 2026.
+const LAUNCHED = "11 October 2026";
+// Season 1 opened by the Safe at block 26208562; its pot stays undisclosed.
+const SEASON_1 = { opened: "19 October 2026", ends: "18 January 2027" };
+const etherscan = (a: string) => `https://etherscan.io/address/${a}#code`;
+const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
+
 export function Tokenomics() {
   const w = useSiteWallet();
   const largest = Math.max(...LAUNCH.allocation.map((a) => a.bps ?? 0), 1);
@@ -18,10 +25,10 @@ export function Tokenomics() {
             <Fig v={compact(LAUNCH.supply)} /> <span>INFER</span>
           </h1>
           <p className="infer-lede">
-            Fixed supply, minted once by IdentityMD's launch factory, with no
-            owner, no further minting and no tax. Every bucket is a contract
-            whose share is a constant in its verified source, paid in the launch
-            transaction by a permissionless split. INFER is the token of the
+            Fixed supply, minted once by IdentityMD's launch factory on{" "}
+            {LAUNCHED}, with no owner, no further minting and no tax. Every
+            bucket is a contract whose share is a constant in its verified
+            source, paid in the launch transaction by a permissionless split. INFER is the token of the
             imdUSD protocol: launched with permanent liquidity against{" "}
             {LAUNCH.pair}, claimed against genesis points for holding imdUSD,
             redeemable for the community's legacy tokens, and stakeable for a
@@ -75,15 +82,16 @@ export function Tokenomics() {
             <section aria-labelledby="launch-h">
               <h2 id="launch-h">The launch</h2>
               <p>
-                A custom-token launch on Ethereum mainnet by the IdentityMD
-                swarm, which writes, reviews and deploys the contracts.
+                INFER launched on Ethereum mainnet on {LAUNCHED}: a
+                custom-token launch by the IdentityMD swarm, which wrote,
+                reviewed and deployed the contracts.
               </p>
               <p>
-                The factory keeps a fixed share for the agents that build it,
-                seeds the {LAUNCH.pair}
-                /INFER pool on one side from the opening price upward and holds
-                that liquidity for good, and sends the rest to the splitter that
-                pays the buckets above. The opening market cap of{" "}
+                The factory kept a fixed share for the agents that built it,
+                seeded the {LAUNCH.pair}
+                /INFER pool on one side from the opening price upward, where it
+                holds that liquidity for good, and sent the rest to the splitter
+                that paid the buckets above. The opening market cap of{" "}
                 <Fig
                   v={whole(LAUNCH.openingMarketCapImd, 0)}
                   unit={LAUNCH.pair}
@@ -97,12 +105,47 @@ export function Tokenomics() {
                 <a href={WHITEPAPER} target="_blank" rel="noreferrer">
                   whitepaper.imdusd.com
                 </a>
-                . Contract addresses are published here at launch.
+                .
               </p>
+            </section>
+
+            <section aria-labelledby="contracts-h">
+              <h2 id="contracts-h">Contracts</h2>
+              <dl className="infer-lines">
+                {(
+                  [
+                    ["INFER token", LAUNCH.contracts.infer],
+                    ["Season vault", LAUNCH.contracts.seasonVault],
+                    ["Legacy redeemer", LAUNCH.contracts.legacyRedeemer],
+                    ["sINFER staking vault", LAUNCH.contracts.stakedInfer],
+                    ["Staking dripper", LAUNCH.contracts.dripper],
+                    ["Founder stream", LAUNCH.contracts.founderStream],
+                  ] as const
+                ).map(([k, a]) => (
+                  <Line
+                    key={k}
+                    k={k}
+                    v={
+                      a ? (
+                        <a href={etherscan(a)} target="_blank" rel="noreferrer" title={a}>
+                          {short(a)} ↗
+                        </a>
+                      ) : (
+                        <Fig v={null} />
+                      )
+                    }
+                  />
+                ))}
+              </dl>
+              <p className="infer-fine">Each is verified on Etherscan.</p>
             </section>
 
             <section aria-labelledby="seasons-h">
               <h2 id="seasons-h">Seasons</h2>
+              <p>
+                Season 1 is live: it opened on {SEASON_1.opened} and runs to{" "}
+                {SEASON_1.ends}.
+              </p>
               <p>
                 Up to {LAUNCH.seasons.count} seasons of {LAUNCH.seasons.weeks}{" "}
                 weeks. Each is announced at least 48 hours ahead with its pot
@@ -171,9 +214,10 @@ export function Tokenomics() {
               <p>
                 Holders of the community's earlier tokens burn them for INFER at
                 rates fixed from the redeemable supply on launch day, so neither
-                allocation can be over-claimed. MIYA redeems at any time; MXXN
-                only inside its full-moon transfer windows. Both close after one
-                year, and what is left goes to the Treasury.
+                allocation can be over-claimed. Redemptions are open: MIYA
+                redeems at any time; MXXN only inside its full-moon transfer
+                windows. Both close one year after launch, and what is left goes
+                to the Treasury.
               </p>
               <dl className="infer-lines">
                 {LAUNCH.redemptions.map((r) => (
@@ -221,8 +265,9 @@ export function Tokenomics() {
                       : String(LAUNCH.founder.cliffDays)
                   }
                 />
-                -day cliff, from a contract with no admin. Nothing moves on day
-                one.
+                -day cliff, from a contract with no admin. It started at launch
+                on {LAUNCHED}; the cliff passed on 10 November, and it now
+                releases a little every block until 11 October 2027.
               </p>
               <dl className="infer-lines">
                 <Line
