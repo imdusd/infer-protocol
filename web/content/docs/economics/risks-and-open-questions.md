@@ -83,7 +83,6 @@ The code has been through thirty reviews since 2026-10-03: two single audits, pa
 
 ## Not yet proven
 
-- That each launch feed accepts a live, service-signed answer to its own question. One attestation per feed is bought and its receipt published with the addresses at launch.
 - How much IMD the pool can absorb under stress, and how many keepers will compete.
 - Whether the oracle service answers fast enough for the maximum price age the feeds allow.
 - That the daily update budget is enough in a volatile market.

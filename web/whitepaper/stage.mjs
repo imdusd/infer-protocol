@@ -38,9 +38,16 @@ writeFileSync(
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
   Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+/
+  Link: <https://whitepaper.imdusd.com/>; rel="canonical"
 `,
 );
-writeFileSync(resolve(out, "robots.txt"), "User-agent: *\nAllow: /\n");
+// The canonical URL goes in a header, not the page, so the file stays byte-for-byte the IPFS copy.
+writeFileSync(resolve(out, "robots.txt"), "User-agent: *\nAllow: /\nSitemap: https://whitepaper.imdusd.com/sitemap.xml\n");
+writeFileSync(
+  resolve(out, "sitemap.xml"),
+  `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>https://whitepaper.imdusd.com/</loc></url>\n</urlset>\n`,
+);
 console.log(
   `whitepaper staged: ${html.length} bytes, sha256 ${createHash("sha256").update(html).digest("hex")}`,
 );
