@@ -17,6 +17,15 @@ export function Tokenomics() {
   return (
     <Shell page="tokenomics" depth={1} wallet={w} className="infer-page">
       <main className="infer-doc">
+        {/* Season 1 as a banner over the page, linking down to the seasons (user, 2026-11-24). */}
+        <a className="infer-banner" href="#seasons">
+          <span className="infer-banner-dot" aria-hidden="true" />
+          Season 1 is live: it opened on {SEASON_1.opened} and runs to{" "}
+          {SEASON_1.ends}.
+          <span className="infer-banner-go" aria-hidden="true">
+            ↓
+          </span>
+        </a>
         <header className="infer-doc-head">
           <p className="infer-kicker">
             Inference-Backed Endogenous Financial Reserve
@@ -140,12 +149,8 @@ export function Tokenomics() {
               <p className="infer-fine">Each is verified on Etherscan.</p>
             </section>
 
-            <section aria-labelledby="seasons-h">
+            <section id="seasons" aria-labelledby="seasons-h">
               <h2 id="seasons-h">Seasons</h2>
-              <p>
-                Season 1 is live: it opened on {SEASON_1.opened} and runs to{" "}
-                {SEASON_1.ends}.
-              </p>
               <p>
                 Up to {LAUNCH.seasons.count} seasons of {LAUNCH.seasons.weeks}{" "}
                 weeks. Each is announced at least 48 hours ahead with its pot
