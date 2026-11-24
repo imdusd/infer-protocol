@@ -8,7 +8,7 @@
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync, copyFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { Marked } from "marked";
-import { postLd } from "./seo.mjs";
+import { postLd, urlEntry } from "./seo.mjs";
 
 export const BLOG_SITE = "https://blog.imdusd.com";
 const REQUIRED = ["title", "date", "summary"];
@@ -281,7 +281,7 @@ export function renderBlog({ outDir, contentDir, site = BLOG_SITE }) {
       mkdirSync(resolve(outDir, p.slug), { recursive: true });
       copyFileSync(resolve(contentDir, `${p.slug}.png`), resolve(outDir, p.slug, "card.png"));
     }
-    const image = card ? `${site}/${p.slug}/card.png` : `${site}/icon-512.png`;
+    const image = card ? `${site}/${p.slug}/card.png` : `${site}/share.png`;
     const hasChangelog = headings.some((h) => h.id === "changelog");
     const meta =
       `<p class="post-serial"><span>${issueNo(p.issue)}</span><span>${escapeHtml(longDate(p.meta.date))}</span><span>${escapeHtml(p.meta.author)}</span></p>`;
@@ -308,7 +308,7 @@ export function renderBlog({ outDir, contentDir, site = BLOG_SITE }) {
       p.slug,
       `${p.meta.title} · imdUSD`,
       p.meta.summary,
-      socialTags(`${site}/${p.slug}/`, p.meta.title, p.meta.summary, image, { large: card }) +
+      socialTags(`${site}/${p.slug}/`, p.meta.title, p.meta.summary, image, { large: true }) +
         `<meta property="article:published_time" content="${p.meta.date}" />` +
         (p.meta.updated ? `<meta property="article:modified_time" content="${p.meta.updated}" />` : "") +
         postLd({ url: `${site}/${p.slug}/`, title: p.meta.title, description: p.meta.summary, date: p.meta.date, updated: p.meta.updated }),
@@ -336,7 +336,7 @@ export function renderBlog({ outDir, contentDir, site = BLOG_SITE }) {
     `<p class="ledger-foot"><a href="/feed.xml">Subscribe by RSS</a></p></section>` +
     `</main>` +
     footer();
-  page("", "imdUSD blog", "Publications from imdUSD: protocol strategy, releases and research.", socialTags(`${site}/`, "imdUSD blog", "Publications from imdUSD: protocol strategy, releases and research.", `${site}/icon-512.png`, { type: "website" }), indexBody);
+  page("", "imdUSD blog", "Publications from imdUSD: protocol strategy, releases and research.", socialTags(`${site}/`, "imdUSD blog", "Publications from imdUSD: protocol strategy, releases and research.", `${site}/share.png`, { type: "website", large: true }), indexBody);
 
   // The not-found page: the same shell, served at any address (so absolute paths), never indexed.
   const notFound = template
@@ -354,8 +354,15 @@ export function renderBlog({ outDir, contentDir, site = BLOG_SITE }) {
   writeFileSync(
     resolve(outDir, "sitemap.xml"),
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
-      [`  <url><loc>${site}/</loc></url>`, ...posts.map((p) => `  <url><loc>${site}/${p.slug}/</loc><lastmod>${p.meta.updated || p.meta.date}</lastmod></url>`)].join("\n") +
+      [urlEntry(`${site}/`, posts.map((p) => p.meta.updated || p.meta.date).sort().at(-1)), ...posts.map((p) => urlEntry(`${site}/${p.slug}/`, p.meta.updated || p.meta.date))].join("\n") +
       `\n</urlset>\n`,
+  );
+  // llms.txt (https://llmstxt.org): the publications for a language model.
+  writeFileSync(
+    resolve(outDir, "llms.txt"),
+    `# imdUSD blog\n\n> Publications from imdUSD, a dollar stablecoin on Ethereum borrowed against staked IMD: protocol strategy, releases and research.\n\n` +
+      posts.map((p) => `- [${p.meta.title}](${site}/${p.slug}/): ${p.meta.summary}`).join("\n") +
+      `\n- [imdUSD](https://imdusd.com/llms.txt): the protocol\n- [INFER](https://infer.imdusd.com/llms.txt): its token\n`,
   );
   writeFileSync(resolve(outDir, "robots.txt"), `User-agent: *\nAllow: /\n\nSitemap: ${site}/sitemap.xml\n`);
   return posts;

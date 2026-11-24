@@ -75,7 +75,7 @@ test("a post renders its title, plate, living line, contents and changelog; raw 
   assert.match(html, /<td data-label="Amount" class="num">1,000<\/td>/);
   assert.ok(!html.includes("<script>alert(1)</script>"), "raw HTML must not render");
   assert.match(html, /\.\.\/assets\/a\.js/, "a post's asset paths point one level up");
-  assert.match(html, /twitter:card" content="summary"/);
+  assert.match(html, /twitter:card" content="summary_large_image"/);
   const index = readFileSync(join(out, "index.html"), "utf8");
   assert.match(index, /href="test-post\/"/);
   assert.match(readFileSync(join(out, "404.html"), "utf8"), /name="robots" content="noindex"/);

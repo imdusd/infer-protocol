@@ -13,7 +13,7 @@ import { renderDocs, socialTags } from "./scripts/docs-pages.mjs";
 // @ts-expect-error plain ESM build script without types
 import { inferLlms } from "./scripts/infer-llms.mjs";
 // @ts-expect-error plain ESM build script without types
-import { homeLd, homeSummary, inferLd } from "./scripts/seo.mjs";
+import { buildSummary, changedOn, homeLd, homeSummary, inferLd, inferSummary, statsLd, statsSummary, urlEntry, withSummary } from "./scripts/seo.mjs";
 // @ts-expect-error plain ESM build script without types
 import { renderBlog } from "./scripts/blog-pages.mjs";
 import react from "@vitejs/plugin-react";
@@ -162,6 +162,9 @@ const walk = (dir: string): string[] =>
     return statSync(p).isDirectory() ? walk(p) : [p];
   });
 
+/** The homepage's title in search results and cards; the app export keeps the plain name. */
+const HOME_TITLE = "imdUSD: dollar stablecoin priced by AI agents";
+
 function publicSite(): Plugin {
   return {
     name: "imdusd-public-site",
@@ -175,6 +178,7 @@ function publicSite(): Plugin {
         source: LAUNCH ? LAUNCH_REDIRECTS : PUBLIC_REDIRECTS,
       });
       this.emitFile({ type: "asset", fileName: "robots.txt", source: ROBOTS });
+      this.emitFile({ type: "asset", fileName: "share.png", source: readFileSync(resolve(import.meta.dirname, "share/imdusd.png")) });
       // The terminal's own RPC serves only these contracts; the public build has no terminal, so no /rpc.
       if (LAUNCH)
         this.emitFile({
@@ -202,10 +206,12 @@ function publicSite(): Plugin {
         html.match(/<meta\s+name="description"\s+content="([^"]*)"/)?.[1] ?? "";
       writeFileSync(
         home,
-        html.replace(
-          "</head>",
-          `${socialTags(SITE, `${SITE}/`, "imdUSD", description, { type: "website" })}${homeLd()}</head>`,
-        ).replace('<div id="root"></div>', `<div id="root">${homeSummary()}</div>`),
+        withSummary(
+          html
+            .replace("<title>imdUSD</title>", `<title>${HOME_TITLE}</title>`)
+            .replace("</head>", `${socialTags(SITE, `${SITE}/`, HOME_TITLE, description, { type: "website" })}${homeLd()}</head>`),
+          homeSummary(),
+        ),
       );
       // The analytics page's canonical URL and social card (launch build only: the public build has no such page).
       if (LAUNCH) {
@@ -214,7 +220,17 @@ function publicSite(): Plugin {
         const about = page.match(/<meta\s+name="description"\s+content="([^"]*)"/)?.[1] ?? "";
         writeFileSync(
           analytics,
-          page.replace("</head>", `${socialTags(SITE, `${SITE}/stats/`, "imdUSD Analytics", about, { type: "website" })}</head>`),
+          withSummary(
+            page.replace("</head>", `${socialTags(SITE, `${SITE}/stats/`, "imdUSD live stats: peg, backing and price updates", about, { type: "website" })}${statsLd()}</head>`),
+            statsSummary(),
+          ),
+        );
+        const terminal = resolve(dir, "terminal/index.html");
+        const app = readFileSync(terminal, "utf8");
+        const appAbout = app.match(/<meta\s+name="description"\s+content="([^"]*)"/)?.[1] ?? "";
+        writeFileSync(
+          terminal,
+          app.replace("</head>", `${socialTags(SITE, `${SITE}/terminal/`, "imdUSD Terminal", appAbout, { type: "website" })}</head>`),
         );
       }
       // The links page's canonical URL and social card (every public build has it).
@@ -227,12 +243,15 @@ function publicSite(): Plugin {
       );
       // /build/: their canonical URLs and social cards (every public build has them).
       for (const [path, title] of [
-        ["build/", "Build with the swarm · imdUSD"],
+        ["build/", "Build with the AI agent swarm · imdUSD"],
       ]) {
         const file = resolve(dir, `${path}index.html`);
         const page = readFileSync(file, "utf8");
         const about = page.match(/<meta\s+name="description"\s+content="([^"]*)"/)?.[1] ?? "";
-        writeFileSync(file, page.replace("</head>", `${socialTags(SITE, `${SITE}/${path}`, title, about, { type: "website" })}</head>`));
+        writeFileSync(
+          file,
+          withSummary(page.replace("</head>", `${socialTags(SITE, `${SITE}/${path}`, title, about, { type: "website" })}</head>`), buildSummary()),
+        );
       }
       // The not-found page is served at whatever path was asked for, so its URLs must be absolute.
       const notFound = resolve(dir, "404.html");
@@ -328,6 +347,8 @@ function playerTags(url: string, title: string, description: string, player = PL
     `<meta name="twitter:player:height" content="${PLAYER.height}" />`
   );
 }
+/** The source whose last change dates each page in the sitemap. */
+const INFER_SOURCE: Record<string, string> = { "": "App.tsx", "buy/": "Buy.tsx", "claim/": "Claim.tsx", "tokenomics/": "Tokenomics.tsx", "97/": "infer97.css" };
 function inferSite(): Plugin {
   // The export directory, taken from the build rather than assumed, so `--outDir` works (a QA
   // build against a fork lives beside the real one without touching it).
@@ -385,11 +406,16 @@ function inferSite(): Plugin {
       });
       this.emitFile({
         type: "asset",
+        fileName: "share.png",
+        source: readFileSync(resolve(import.meta.dirname, "share/infer.png")),
+      });
+      this.emitFile({
+        type: "asset",
         fileName: "sitemap.xml",
         source:
           `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
           ["", "buy/", "claim/", "tokenomics/", "97/"]
-            .map((p) => `  <url><loc>${INFER_SITE}/${p}</loc></url>`)
+            .map((p) => urlEntry(`${INFER_SITE}/${p}`, changedOn(resolve(launchDir, INFER_SOURCE[p]))))
             .join("\n") +
           `\n</urlset>\n`,
       });
@@ -422,13 +448,12 @@ function inferSite(): Plugin {
         const description =
           html.match(/<meta\s+name="description"\s+content="([^"]*)"/)?.[1] ??
           "";
-        writeFileSync(
-          file,
-          html.replace(
+        const tagged = html.replace(
             "</head>",
             `${buildMeta}${page === "buy/" ? playerTags(`${INFER_SITE}/${page}`, title, description) : page === "97/" ? playerTags(`${INFER_SITE}/${page}`, title, description, PLAYER_97) : socialTags(INFER_SITE, `${INFER_SITE}/${page}`, title, description, { type: "website" })}${page === "" ? inferLd() : ""}</head>`,
-          ),
         );
+        const body = inferSummary(page, launch);
+        writeFileSync(file, body ? withSummary(tagged, body) : tagged);
       }
     },
     closeBundle() {
@@ -492,6 +517,7 @@ function blogSite(): Plugin {
       manifest.start_url = "./";
       manifest.description = "Publications from imdUSD: protocol strategy, releases and research.";
       writeFileSync(file, JSON.stringify(manifest, null, 2) + "\n");
+      writeFileSync(resolve(dir, "share.png"), readFileSync(resolve(import.meta.dirname, "share/imdusd.png")));
       const posts = renderBlog({ outDir: dir, contentDir: resolve(import.meta.dirname, "content/blog") });
       this.info(`rendered ${posts.length} blog posts`);
     },
