@@ -17,7 +17,7 @@
   --caution: #a16207;
   --danger: #8c2f2f;
   --clear: transparent;
-  /* The CoinGecko mark's eye and pupil: white on a dark pupil in both themes, like CoinGecko's own. */
+  /* The CoinGecko mark's eye and pupil: a white eye on a dark pupil here; in dark the mark is all one white. */
   --mark-eye: #fffdf8;
   --mark-pupil: #16202e;
 }
@@ -36,8 +36,8 @@
   --caution: #facc15;
   --danger: #e19a9a;
   --clear: transparent;
-  --mark-eye: #fffdf8;
-  --mark-pupil: #111111;
+  --mark-eye: #eeeeee;
+  --mark-pupil: #eeeeee;
 }
 :root {
   --fast: 150ms;
@@ -2291,11 +2291,15 @@ html.app-page body {
   min-height: 24px;
   padding: 0;
 }
+/* An outline ring for the favicon's disc (never filled), the gecko inside it as in CoinGecko's own. */
 .coingecko-mark {
   position: relative;
   display: block;
-  width: 13px;
-  height: 13px;
+  box-sizing: border-box;
+  width: 14px;
+  height: 14px;
+  border: 1.25px solid currentColor;
+  border-radius: 50%;
 }
 .coingecko-mark > span {
   position: absolute;
