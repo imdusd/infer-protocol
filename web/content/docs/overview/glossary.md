@@ -2,6 +2,7 @@
 title: Glossary
 section: overview
 order: 4
+description: The words imdUSD uses in plain English, each with its contract name, from sIMD, mat and redemption to the swarm attestations that price the collateral.
 audience: everyone
 sources:
   - docs/NAMING.md:1-68

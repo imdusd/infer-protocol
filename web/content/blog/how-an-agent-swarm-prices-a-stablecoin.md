@@ -2,6 +2,7 @@
 title: "How an agent swarm prices a stablecoin"
 date: 2026-11-24
 summary: "imdUSD's collateral is priced by panels of IdentityMD agents answering one fixed question, signed by the oracle service and checked on chain before any feed moves. The exact question, every check, what it proves, what it does not, and the record since launch."
+description: "How AI agent panels price the collateral behind imdUSD: the exact question, the on-chain checks, what a signed answer proves, and the record since launch."
 author: imdUSD
 ---
 

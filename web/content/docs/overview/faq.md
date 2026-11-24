@@ -2,6 +2,7 @@
 title: Questions and answers
 section: overview
 order: 5
+description: Answers about imdUSD and INFER, with the contract address, what backs the stablecoin, how AI agents price it, how to redeem it, and what can go wrong.
 audience: everyone
 faq: true
 sources:
