@@ -11,6 +11,7 @@ import {
   INFER_SITE,
   X_ACCOUNT,
   INFER_DEXSCREENER,
+  INFER_COINGECKO,
   SOURCE_REPO,
   IDENTITYMD,
 } from "./site";
@@ -39,6 +40,7 @@ const GROUPS: Group[] = [
       { title: "INFER", sub: "The protocol's token: claim, swap, stake and the tokenomics", url: INFER_SITE, external: true },
       { title: "Buy INFER", sub: "Swap for INFER from your wallet", url: `${INFER_SITE}/buy/`, external: true },
       { title: "INFER on DexScreener", sub: "The INFER/IMD launch pool's chart", url: INFER_DEXSCREENER, external: true },
+      { title: "INFER on CoinGecko", sub: "Price, market cap and markets", url: INFER_COINGECKO, external: true },
     ],
   },
   {
