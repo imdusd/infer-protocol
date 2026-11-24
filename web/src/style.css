@@ -3151,8 +3151,10 @@ button.balance-hint.balance-connect:hover {
   gap: 16px;
   margin-bottom: 18px;
 }
-.infer-pane-head h1 {
+.infer-pane-head h1,
+.infer-pane-head h2 {
   font-size: 30px;
+  line-height: 1.2;
   margin: 0;
 }
 .infer-switch {
@@ -3769,7 +3771,8 @@ button.infer-go:not(:disabled):hover {
   .infer-pane {
     padding: 18px 16px 16px;
   }
-  .infer-pane-head h1 {
+  .infer-pane-head h1,
+  .infer-pane-head h2 {
     font-size: 26px;
   }
   .infer-page main {
