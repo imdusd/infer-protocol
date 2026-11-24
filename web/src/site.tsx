@@ -8,7 +8,6 @@ import { PegTicker } from "./peg-price";
 import { OracleChip } from "./oracle-chip";
 import { lazySound } from "./lazy-sound";
 import { NetworkChip } from "./network-chip";
-import { Mark } from "./infer/mark";
 export { NetworkChip };
 
 // The sound button's score is loaded once the page is idle (lazy-sound.tsx).
@@ -104,9 +103,8 @@ export function SiteHeader({
           {TERMINAL && link("analytics", "stats/", "Stats")}
           {link("docs", "docs/", "Docs")}
           {/* Blog and Whitepaper live in the footer (user, 2026-10-21: a cleaner header). */}
-          {/* The INFER logo in place of its name (user, 2026-11-24). */}
-          <a className="site-nav-infer" href={INFER_SITE} target="_blank" rel="noreferrer" aria-label="INFER (opens in a new tab)" title="INFER">
-            <Mark />
+          <a href={INFER_SITE} target="_blank" rel="noreferrer">
+            INFER ↗
           </a>
         </nav>
       </div>

@@ -1991,17 +1991,6 @@ details[open] > summary::after {
 .site-nav a[aria-current="page"] {
   box-shadow: inset 0 -2px 0 var(--text);
 }
-/* The INFER logo link: the glyph sits on the text links' line without making the row taller. */
-.site-nav a.site-nav-infer {
-  display: inline-flex;
-  align-items: center;
-  padding-block: 0;
-  align-self: center;
-}
-.site-nav-infer .infer-mark-glyph {
-  width: 22px;
-  height: 22px;
-}
 .brand {
   align-items: center;
 }
