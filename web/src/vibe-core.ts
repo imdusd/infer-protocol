@@ -333,6 +333,7 @@ const mounted = (root: Element) => !!root.firstElementChild && !root.firstElemen
 function opens(scene: Scene): boolean {
   const root = document.getElementById("root");
   if (!scene.enter || !root?.firstElementChild || mounted(root)) return false;
+  if (document.documentElement.classList.contains("app-terminal")) return false; // people come there to act
   if (window.top !== window || document.hidden) return false;
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
   if ((BUDGET - performance.now()) / CUE < SHORTEST) return false;
