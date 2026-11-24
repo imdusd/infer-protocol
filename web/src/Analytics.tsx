@@ -215,7 +215,8 @@ export function Analytics() {
                 cols={ledger.data.days.map((d, i, a) => ({
                   day: d.day,
                   parts: [{ v: d.supply, tone: i === a.length - 1 ? "ink" : "muted", title: `${d.day}: ${whole(d.supply)} imdUSD (+${whole(d.minted)} drawn, −${whole(d.burned)} repaid)` }],
-                  label: i === a.length - 1 || i === 0 ? whole(d.supply) : undefined,
+                  // Only the latest day is labelled: the first day's figure crowded the axis (user, 2026-11-24).
+                  label: i === a.length - 1 ? whole(d.supply) : undefined,
                 }))}
               />
             </figure>
