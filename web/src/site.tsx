@@ -98,9 +98,9 @@ export function SiteHeader({
         </a>
         <nav className="site-nav" aria-label="Site">
           {TERMINAL && link("terminal", "terminal/", "Terminal")}
-          {TERMINAL && link("analytics", "stats/", "Stats")}
-          {/* Builders and partners find their way from every page, not only borrowers (2026-10-30). */}
+          {/* Builders and partners find their way from every page, not only borrowers (2026-10-30). Build sits left of Stats (user, 2026-11-24). */}
           {link("build", "build/", "Build")}
+          {TERMINAL && link("analytics", "stats/", "Stats")}
           {link("docs", "docs/", "Docs")}
           {/* Blog and Whitepaper live in the footer (user, 2026-10-21: a cleaner header). */}
           <a href={INFER_SITE} target="_blank" rel="noreferrer">
