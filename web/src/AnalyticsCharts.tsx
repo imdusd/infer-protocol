@@ -184,6 +184,10 @@ export function DayBars({ cols, label, unit, height = 200 }: { cols: DayCol[]; l
   const band = (R - L) / Math.max(1, cols.length),
     bw = Math.min(46, band * 0.58);
   const every = Math.ceil(cols.length / 8);
+  const last = cols.length - 1;
+  // Text centred on the last bar runs off the right edge: end it at the bar's right side instead.
+  const anchor = (i: number, xx: number) =>
+    i === last && cols.length > 1 ? { x: xx + bw, textAnchor: "end" as const } : { x: xx + bw / 2, textAnchor: "middle" as const };
   return (
     <svg viewBox={`0 0 ${W} ${height}`} role="img" aria-label={label} className="an-svg">
       <g className="an-grid">
@@ -212,12 +216,13 @@ export function DayBars({ cols, label, unit, height = 200 }: { cols: DayCol[]; l
               );
             })}
             {c.label && (
-              <text className="an-strong" x={xx + bw / 2} y={y(total(c)) - 6} textAnchor="middle">
+              <text className="an-strong" y={y(total(c)) - 6} {...anchor(i, xx)}>
                 {c.label}
               </text>
             )}
-            {(i % every === 0 || i === cols.length - 1) && (
-              <text x={xx + bw / 2} y={B + 16} textAnchor="middle">
+            {/* Every `every`th day, and the last; a regular tick too close to the last one gives way to it. */}
+            {(i === last || (i % every === 0 && last - i >= every)) && (
+              <text y={B + 16} {...anchor(i, xx)}>
                 {c.day}
               </text>
             )}
