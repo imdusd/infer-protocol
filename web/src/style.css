@@ -6360,3 +6360,29 @@ body:has(> .vibe-canvas:not([hidden])) .blog-masthead {
 .prerender a {
   color: var(--text);
 }
+
+/* A static summary is for readers without JavaScript, and for a page slow enough to leave someone waiting: it shows only
+   if the page's own code has not replaced it by then. */
+.prerender {
+  animation: prerender-wait 0s 0.6s both;
+}
+@keyframes prerender-wait {
+  from {
+    visibility: hidden;
+  }
+}
+
+/* The entrance (vibe-core.ts): the page waits, loaded, while the background draws itself, then fades in over it. Hidden
+   rather than transparent, so browsers time the page from when it is really shown. */
+html[data-entering="draw"] #root,
+html[data-entering="draw"] #root * {
+  visibility: hidden;
+}
+html[data-entering="page"] #root {
+  animation: page-in 0.45s var(--ease);
+}
+@keyframes page-in {
+  from {
+    opacity: 0.02;
+  }
+}

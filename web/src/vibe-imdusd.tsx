@@ -44,6 +44,17 @@ void main() {
   ink = max(ink, field * uInk1 * 0.3);
   outColor = paint(ink);
 }`,
+    enterMs: 2400,
+    enter: `
+  // The lathe goes round once: the outer rosette clockwise from the top, the inner one the other way, and the
+  // field's lines spread out from the finished edge.
+  vec2 p = (f - uCenter) / uScale;
+  float r = length(p), a = fract(atan(p.x, p.y) / 6.28319);
+  float m = r < 1.0 ? drawn((r < 0.47 ? 1.0 - a : a) * 0.8, e, 0.015) : drawn(0.4 + 0.6 * clamp((r - 1.0) / 1.8, 0.0, 1.0), e, 0.2);
+  float th = 6.28319 * min(e * 1.015 / 0.8, 1.0), on = 1.0 - step(0.8, e);
+  float tip = max(tool(p, vec2(sin(th), cos(th)) * 0.96, 0.012), tool(p, vec2(-sin(th), cos(th)) * 0.44, 0.009));
+  return vec2(m, tip * on);
+`,
   },
   {
     id: "lathe",
@@ -67,6 +78,12 @@ void main() {
   float b = lines(r.y * 60.0 + 1.6 * sin(r.x * 3.5 - t * 0.38 + 1.3), 1.0);
   outColor = paint(max(a, b) * uInk1 * presence(f));
 }`,
+    enterMs: 2050,
+    enter: `
+  // The work turns past the tool: one front crosses the page, rippling as the lines do.
+  vec2 q = f / uRes;
+  return vec2(drawn(0.88 * q.x + 0.06 + 0.06 * sin(q.y * 34.0), e, 0.05), 0.0);
+`,
   },
   {
     id: "topography",
@@ -92,6 +109,14 @@ void main() {
   float major = lines(h * 16.0 / 5.0, 1.8);
   outColor = paint(max(minor * 0.7, major) * uInk1 * presence(f));
 }`,
+    enterMs: 2300,
+    enter: `
+  // The land rises: the lowest contour first, then each one above it.
+  vec2 p = f / uRes.y * 2.4;
+  vec2 warp = vec2(fbm(p + vec2(uTime * 0.06, 0.0)), fbm(p + vec2(5.2, -uTime * 0.05)));
+  float h = fbm(p + 1.2 * warp + vec2(uTime * 0.02, 0.0));
+  return vec2(drawn(clamp((h - 0.22) / 0.58, 0.0, 1.0), e, 0.06), 0.0);
+`,
   },
   {
     id: "tide",
@@ -119,6 +144,14 @@ void main() {
   float b = lines(d2 * 55.0 - t * 0.5, 1.0) * (1.0 - smoothstep(0.1, 0.8, d2));
   outColor = paint(max(a, b) * uInk1 * presence(f));
 }`,
+    enterMs: 2200,
+    enter: `
+  // Two drops fall, and the rings reach as far as the water has moved.
+  vec2 p = f / uRes.y, s1 = uCenter / uRes.y;
+  vec2 s2 = s1 + vec2(-0.32, -0.22) * uScale / uRes.y * 1.6;
+  float far = min(length(p - s1), length(p - s2) + 0.12);
+  return vec2(drawn(clamp(far / 0.9, 0.0, 1.0), e, 0.04), 0.0);
+`,
   },
   {
     id: "ridgelines",
@@ -151,6 +184,12 @@ void main() {
   }
   outColor = paint(ink * uInk1 * 0.9 * presence(f));
 }`,
+    enterMs: 2200,
+    enter: `
+  // The ticker prints: every ridge runs out from the left, the nearest first.
+  vec2 q = f / uRes;
+  return vec2(drawn(0.5 * q.y + 0.5 * q.x, e, 0.03), 0.0);
+`,
   },
   {
     id: "halftone",
@@ -187,6 +226,13 @@ void main() {
   float dotInk = 1.0 - smoothstep(r - aa, r + aa, d);
   outColor = paint(dotInk * uInk1 * 0.75 * presence(f));
 }`,
+    enterMs: 2050,
+    enter: `
+  // The plate takes ink: the darkest tone prints first, dot by dot.
+  vec2 id = floor(rot(0.52) * f / (uRes.y / 80.0));
+  float tone = smoothstep(0.32, 0.78, fbm(id * 0.07 + vec2(uTime * 0.08, uTime * 0.05)));
+  return vec2(drawn(0.7 * (1.0 - tone) + 0.3 * hash(id), e, 0.12), 0.0);
+`,
   },
   {
     id: "hatch",
@@ -212,6 +258,13 @@ void main() {
   float h3 = lines(q.y * 148.0, 0.9) * smoothstep(0.72, 0.82, s);
   outColor = paint(max(max(h1, h2), h3) * uInk1 * 0.85 * presence(f));
 }`,
+    enterMs: 2300,
+    enter: `
+  // Shaded by hand: each stroke is pulled along its own length, no two starting together.
+  vec2 q = f / uRes.y;
+  float along = (q.x - q.y + 1.0) / (uRes.x / uRes.y + 1.0);
+  return vec2(drawn(0.25 * hash(vec2(floor((q.x + q.y) * 105.0 + 0.5), 1.0)) + 0.75 * clamp(along * 1.5 - 0.25, 0.0, 1.0), e, 0.02), 0.0);
+`,
   },
   {
     id: "grid",
@@ -249,6 +302,14 @@ void main() {
   float dotInk = 1.0 - smoothstep(r - 1.0, r + 1.0, d);
   outColor = paint(dotInk * uInk1 * 1.6 * presence(f));
 }`,
+    enterMs: 1950,
+    enter: `
+  // One breath: the dots appear as the first ring from the focus reaches them.
+  float sp = uRes.y / 38.0;
+  vec2 id = floor(f / sp);
+  float far = length((id + 0.5) * sp - uCenter) / length(max(uCenter, uRes - uCenter));
+  return vec2(drawn(clamp(0.93 * far + 0.07 * hash(id), 0.0, 1.0), e, 0.06), 0.0);
+`,
   },
 ];
 
