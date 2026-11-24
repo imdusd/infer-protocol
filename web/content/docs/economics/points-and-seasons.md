@@ -2,6 +2,7 @@
 title: Points and seasons
 section: economics
 order: 4
+description: How INFER points work, what holding imdUSD, providing peg liquidity and liquidating earn, and how each 91-day season is counted from public chain data.
 audience: everyone
 sources:
   - points/season1.ts

@@ -2,6 +2,7 @@
 title: What is imdUSD
 section: overview
 order: 1
+description: imdUSD is a dollar stablecoin on Ethereum, borrowed against staked IMD (sIMD). What backs it, who it is for, how redemption works and what is unproven.
 audience: everyone
 sources:
   - src/ImdUSD.sol:12-75

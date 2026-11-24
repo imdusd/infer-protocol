@@ -3,6 +3,7 @@ title: "imdUSD v2: Scope and Strategy"
 date: 2026-10-21
 updated: 2026-11-09
 summary: "Where imdUSD goes next: a multi-collateral dollar with a permissionless peg, a standing bid that keeps liquidation value in the protocol, debt that is peg liquidity, identity.md seat staking and more chains. A living document, updated as the build moves."
+description: "imdUSD v2 plans: more collateral types, a permissionless peg, a standing bid for liquidations, debt that is peg liquidity, seat staking and more chains."
 author: imdUSD
 living: true
 ---

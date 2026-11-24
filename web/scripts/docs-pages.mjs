@@ -345,11 +345,17 @@ export function renderDocs({ outDir, contentDir, terminal, site }) {
     writeFileSync(resolve(outDir, dir, "index.html"), html);
   };
 
-  const summary = (md) =>
-    (md.replace(/^#.*$/gm, "").match(/^[^\s#>|`-].+$/m)?.[0] ?? "")
+  // A page's description: its own (front matter), else its first paragraph, cut between words.
+  const summary = (md) => {
+    const text = (md.replace(/^#.*$/gm, "").match(/^[^\s#>|`-].+(?:\n(?![\s#>|`-]).+)*/m)?.[0] ?? "")
       .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
       .replace(/[`*_]/g, "")
-      .slice(0, 160);
+      .replace(/\s+/g, " ")
+      .trim();
+    if (text.length <= 160) return text;
+    const whole = text.slice(0, 160).match(/^.{110,}[.!?](?=\s)/)?.[0];
+    return whole ?? `${text.slice(0, 157).replace(/[\s,;:(]+\S*$/, "")}…`;
+  };
 
   pages.forEach((p, i) => {
     const prev = pages[i - 1];
@@ -373,11 +379,12 @@ export function renderDocs({ outDir, contentDir, terminal, site }) {
       nav(p.dir) +
       `</main>` +
       footer(p.dir);
-    const desc = summary(p.body);
+    const desc = p.meta.description || summary(p.body);
     const safeDesc = redact && (REDACT_WHOLE.has(p.file) || TERMINAL_RE.test(desc)) ? "" : desc;
     page(p.dir, `${titleText(p.meta.title, redact)} · imdUSD docs`, safeDesc || `imdUSD docs: ${titleText(p.meta.title, redact)}`, body, p.meta.faq === "true" ? faqLd(questions(p.body)) : "");
   });
 
+  const DOCS_DESCRIPTION = "How the imdUSD stablecoin works: borrowing against staked IMD, redemption, liquidation, the AI agent swarm oracle, governance and every contract address.";
   const index =
     `<main class="docs" id="docs-main">` +
     `<a class="docs-skip" href="#docs-contents">Contents</a>` +
@@ -396,7 +403,7 @@ export function renderDocs({ outDir, contentDir, terminal, site }) {
     nav("docs") +
     `</main>` +
     footer("docs");
-  page("docs", "imdUSD docs", "How imdUSD works: borrowing, redemption, liquidation, the swarm oracle and the contracts.", index, docsIndexLd("How imdUSD works: borrowing, redemption, liquidation, the swarm oracle and the contracts."));
+  page("docs", "imdUSD docs", DOCS_DESCRIPTION, index, docsIndexLd(DOCS_DESCRIPTION));
   if (site) {
     // Every public page but the redacted one, which is not for crawlers until it has content.
     const urls = [

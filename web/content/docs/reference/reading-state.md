@@ -2,6 +2,7 @@
 title: Reading state
 section: reference
 order: 5
+description: How to read imdUSD state from its contracts on Ethereum, from positions, prices and backing to fees, with the checks that each contract is the real one.
 audience: integrators
 sources:
   - src/CDPVault.sol:239-262

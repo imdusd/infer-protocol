@@ -11,6 +11,7 @@ import { Marked } from "marked";
 import { postLd, urlEntry } from "./seo.mjs";
 
 export const BLOG_SITE = "https://blog.imdusd.com";
+const BLOG_DESCRIPTION = "Publications from imdUSD, the dollar stablecoin priced by AI agents: how the oracle works, protocol strategy, releases and research.";
 const REQUIRED = ["title", "date", "summary"];
 
 export const escapeHtml = (s) =>
@@ -307,11 +308,11 @@ export function renderBlog({ outDir, contentDir, site = BLOG_SITE }) {
     page(
       p.slug,
       `${p.meta.title} · imdUSD`,
-      p.meta.summary,
-      socialTags(`${site}/${p.slug}/`, p.meta.title, p.meta.summary, image, { large: true }) +
+      p.meta.description || p.meta.summary,
+      socialTags(`${site}/${p.slug}/`, p.meta.title, p.meta.description || p.meta.summary, image, { large: true }) +
         `<meta property="article:published_time" content="${p.meta.date}" />` +
         (p.meta.updated ? `<meta property="article:modified_time" content="${p.meta.updated}" />` : "") +
-        postLd({ url: `${site}/${p.slug}/`, title: p.meta.title, description: p.meta.summary, date: p.meta.date, updated: p.meta.updated }),
+        postLd({ url: `${site}/${p.slug}/`, title: p.meta.title, description: p.meta.description || p.meta.summary, date: p.meta.date, updated: p.meta.updated }),
       body,
     );
   }
@@ -336,7 +337,7 @@ export function renderBlog({ outDir, contentDir, site = BLOG_SITE }) {
     `<p class="ledger-foot"><a href="/feed.xml">Subscribe by RSS</a></p></section>` +
     `</main>` +
     footer();
-  page("", "imdUSD blog", "Publications from imdUSD: protocol strategy, releases and research.", socialTags(`${site}/`, "imdUSD blog", "Publications from imdUSD: protocol strategy, releases and research.", `${site}/share.png`, { type: "website", large: true }), indexBody);
+  page("", "imdUSD blog", BLOG_DESCRIPTION, socialTags(`${site}/`, "imdUSD blog", BLOG_DESCRIPTION, `${site}/share.png`, { type: "website", large: true }), indexBody);
 
   // The not-found page: the same shell, served at any address (so absolute paths), never indexed.
   const notFound = template
