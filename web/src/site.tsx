@@ -73,7 +73,8 @@ export function DexLink() {
 }
 
 /** The footer's link to INFER on CoinGecko: the gecko in its ring, in the text colour like the marks beside it.
- * Drawn from Arcticons' coingecko icon (Donnnno and contributors, CC BY-SA 4.0), strokes thickened to read at 13px. */
+ * Drawn from Arcticons' coingecko icon (Donnnno and contributors, CC BY-SA 4.0), strokes thickened to read at 13px,
+ * without its smile: CoinGecko's own gecko has none (user, 2026-11-24). */
 export function CoinGeckoLink() {
   return (
     <a className="x-link" href={INFER_COINGECKO} target="_blank" rel="noreferrer" aria-label="INFER on CoinGecko" title="INFER on CoinGecko">
@@ -81,7 +82,6 @@ export function CoinGeckoLink() {
         <g fill="none" stroke="currentColor" strokeWidth="3.6" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="24" cy="24" r="21.5" />
           <path d="M7.051 37.228c4.519-9.359 1.828-21.471 9.117-23.377s12.056 1.345 15.87 2.467s6.978 1.716 7.682 5.27C40.729 26.693 24.13 35.71 27.664 45.5" />
-          <path d="M24.355 26.972c3.196 2.523 6.496 1.685 13.796-1.373" />
           <circle cx="21.047" cy="19.122" r="3.308" />
         </g>
         <circle cx="34.841" cy="22.991" r="1.6" fill="currentColor" />
