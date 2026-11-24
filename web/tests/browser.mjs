@@ -2030,6 +2030,7 @@ try {
       INFER: "https://infer.imdusd.com",
       "Buy INFER": "https://infer.imdusd.com/buy/",
       "INFER on DexScreener": "https://dexscreener.com/ethereum/0x1f03dd2c202cf17b58305b73ae2f8b3143e9c056ed9c9e8dbd4924b350431e95",
+      "INFER on CoinGecko": "https://www.coingecko.com/en/coins/inference-backed-endogenous-financial-reserve",
       X: "https://x.com/imdusd",
       "Source code": "https://github.com/imdusd/infer-protocol",
       IdentityMD: "https://imd.fun",

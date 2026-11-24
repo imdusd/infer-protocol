@@ -2277,7 +2277,7 @@ html.app-page body {
 .site-footer .foot-icons .x-link {
   justify-content: flex-start;
 }
-/* The X and DexScreener marks: icon-only links, padded to a 24px target. */
+/* The X, DexScreener and CoinGecko marks: icon-only links, padded to a 24px target. */
 .site-footer .x-link {
   display: inline-flex;
   align-items: center;
