@@ -72,13 +72,17 @@ export function DexLink() {
   );
 }
 
-/** The footer's link to INFER on CoinGecko: CoinGecko's own favicon, repainted in the text colour (gecko and pupil
- * solid, its disc a 30% tint, the eye's white clear) by a CSS mask, so it follows the theme like the marks beside it.
- * The mask is src/coingecko-mark.png, made from coingecko.com/favicon-96x96.png (user, 2026-11-24: their logo, our colours). */
+/** The footer's link to INFER on CoinGecko: the gecko from CoinGecko's own favicon, without its disc, the body in the
+ * text colour like the marks beside it, the eye white and the pupil dark so it reads in both themes. Three CSS masks
+ * (src/coingecko-{body,eye,pupil}.png) cut from coingecko.com/favicon-96x96.png and cropped to the gecko (user, 2026-11-24). */
 export function CoinGeckoLink() {
   return (
     <a className="x-link" href={INFER_COINGECKO} target="_blank" rel="noreferrer" aria-label="INFER on CoinGecko" title="INFER on CoinGecko">
-      <span className="coingecko-mark" aria-hidden="true" />
+      <span className="coingecko-mark" aria-hidden="true">
+        <span className="coingecko-body" />
+        <span className="coingecko-eye" />
+        <span className="coingecko-pupil" />
+      </span>
     </a>
   );
 }
