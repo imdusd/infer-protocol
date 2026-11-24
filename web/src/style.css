@@ -2286,6 +2286,14 @@ html.app-page body {
   min-height: 24px;
   padding: 0;
 }
+.coingecko-mark {
+  display: block;
+  width: 14px;
+  height: 14px;
+  background-color: currentColor;
+  -webkit-mask: url("./coingecko-mark.png") center / contain no-repeat;
+  mask: url("./coingecko-mark.png") center / contain no-repeat;
+}
 @media (max-width: 720px) {
   .site-footer {
     grid-template-columns: 1fr;

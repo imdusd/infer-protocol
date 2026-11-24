@@ -72,29 +72,13 @@ export function DexLink() {
   );
 }
 
-/** The footer's link to INFER on CoinGecko: its favicon's gecko (head rising into the circle, one big eye, no
- * smile or nostril) redrawn in the text colour like the marks beside it, inside a ring for the favicon's disc. */
+/** The footer's link to INFER on CoinGecko: CoinGecko's own favicon, repainted in the text colour (gecko and pupil
+ * solid, its disc a 30% tint, the eye's white clear) by a CSS mask, so it follows the theme like the marks beside it.
+ * The mask is src/coingecko-mark.png, made from coingecko.com/favicon-96x96.png (user, 2026-11-24: their logo, our colours). */
 export function CoinGeckoLink() {
   return (
     <a className="x-link" href={INFER_COINGECKO} target="_blank" rel="noreferrer" aria-label="INFER on CoinGecko" title="INFER on CoinGecko">
-      <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" focusable="false">
-        <defs>
-          <clipPath id="coingecko-disc">
-            <circle cx="12" cy="12" r="12" />
-          </clipPath>
-        </defs>
-        <circle cx="12" cy="12" r="11.2" fill="none" stroke="currentColor" strokeWidth="1.5" />
-        {/* The favicon's disc, shrunk inside the ring. */}
-        <g transform="translate(12 12) scale(.72) translate(-12 -12)">
-          <path
-            clipPath="url(#coingecko-disc)"
-            fill="currentColor"
-            fillRule="evenodd"
-            d="M1.9 8.8C3 6 4 5 5.05 4.7C7 3.9 9 3.7 10.7 3.8C12.8 3.8 14 4 15.2 4.4C17 5 18 6 19 6.95C20.5 8 21.6 8.7 21.5 9.8C21.4 10.6 20.9 11 20 11.4C18 12.3 16.8 13.3 15.8 14.5C14.3 16.2 13.6 17.5 13.5 18.3L13.3 24H0V8.8ZM7.9 9.2a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0Z"
-          />
-          <circle cx="11.2" cy="9.3" r="1.95" fill="currentColor" />
-        </g>
-      </svg>
+      <span className="coingecko-mark" aria-hidden="true" />
     </a>
   );
 }
