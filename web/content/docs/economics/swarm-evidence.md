@@ -45,6 +45,14 @@ Mint from work uses a different answer: the root of a daily tally of each agent'
 
 The parameter research (linked under Sources) compares imdUSD's settings with other lending protocols and stress-tests them. It argued for larger collateral buffers, a bigger share of the bonus for liquidators, shorter price ages and fees that cover oracle costs, and it questioned relaxing collateral requirements when the swarm is healthy. The launch parameters record which recommendations were taken. The research's market figures are scenarios, not measured losses, and it says itself that the pool's real depth could not be established.
 
-## What is published at launch
+## What was shown at launch
 
-Before the vault is deployed, one attestation is bought for each price feed (price, spot and network health) through the protocol's own `OracleAsker`. A feed accepts an answer only to its own question, and the first values are checked against IMD's pool and an outside reference before the vault exists. The work oracle is not seeded while minting from work is off. Those receipts are published here with the contract addresses. Until a feed's receipt is published, treat its question binding as tested, not proven against the live service.
+Before the vault was deployed, one attestation was bought for each price feed (price, spot and network health) through the protocol's own `OracleAsker`. A feed accepts an answer only to its own question, and the first values were checked against IMD's pool and an outside reference before the vault existed. These are the receipts, each a few minutes before the vault's deployment at block 26166417:
+
+| Feed | First accepted answer | Block |
+|---|---|---|
+| `NhiFeed` (network health) | [`0x1a9775e0…4919f`](https://etherscan.io/tx/0x1a9775e01753ab0094f5bcec6b28cdf4bb0844ba8f70fecec42d8d612754919f) | 26166233 |
+| `PriceFeed` (IMD/ETH) | [`0xb781c80f…18b5b`](https://etherscan.io/tx/0xb781c80f7f551369a4ad6e6b45b91c322ae03f5a07ac46e10de6de7e2c518b5b) | 26166238 |
+| `SpotFeed` (IMD/ETH, last block) | [`0x55a20793…9dae61`](https://etherscan.io/tx/0x55a207930d2dacd4812f684c4496af446e86aa8c92ee4cc83a9383868e9dae61) | 26166242 |
+
+Each feed has kept accepting live, service-signed answers since; every accepted answer emits `AttestationAccepted` and `ValueUpdated` from the feed's address, so the full record is on chain. The work oracle is not seeded while minting from work is off.

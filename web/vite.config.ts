@@ -13,6 +13,8 @@ import { renderDocs, socialTags } from "./scripts/docs-pages.mjs";
 // @ts-expect-error plain ESM build script without types
 import { inferLlms } from "./scripts/infer-llms.mjs";
 // @ts-expect-error plain ESM build script without types
+import { homeLd, homeSummary, inferLd } from "./scripts/seo.mjs";
+// @ts-expect-error plain ESM build script without types
 import { renderBlog } from "./scripts/blog-pages.mjs";
 import react from "@vitejs/plugin-react";
 import { resolve } from "node:path";
@@ -202,8 +204,8 @@ function publicSite(): Plugin {
         home,
         html.replace(
           "</head>",
-          `${socialTags(SITE, `${SITE}/`, "imdUSD", description, { type: "website" })}</head>`,
-        ),
+          `${socialTags(SITE, `${SITE}/`, "imdUSD", description, { type: "website" })}${homeLd()}</head>`,
+        ).replace('<div id="root"></div>', `<div id="root">${homeSummary()}</div>`),
       );
       // The analytics page's canonical URL and social card (launch build only: the public build has no such page).
       if (LAUNCH) {
@@ -386,7 +388,7 @@ function inferSite(): Plugin {
         fileName: "sitemap.xml",
         source:
           `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
-          ["", "claim/", "tokenomics/", "97/"]
+          ["", "buy/", "claim/", "tokenomics/", "97/"]
             .map((p) => `  <url><loc>${INFER_SITE}/${p}</loc></url>`)
             .join("\n") +
           `\n</urlset>\n`,
@@ -424,7 +426,7 @@ function inferSite(): Plugin {
           file,
           html.replace(
             "</head>",
-            `${buildMeta}${page === "buy/" ? playerTags(`${INFER_SITE}/${page}`, title, description) : page === "97/" ? playerTags(`${INFER_SITE}/${page}`, title, description, PLAYER_97) : socialTags(INFER_SITE, `${INFER_SITE}/${page}`, title, description, { type: "website" })}</head>`,
+            `${buildMeta}${page === "buy/" ? playerTags(`${INFER_SITE}/${page}`, title, description) : page === "97/" ? playerTags(`${INFER_SITE}/${page}`, title, description, PLAYER_97) : socialTags(INFER_SITE, `${INFER_SITE}/${page}`, title, description, { type: "website" })}${page === "" ? inferLd() : ""}</head>`,
           ),
         );
       }

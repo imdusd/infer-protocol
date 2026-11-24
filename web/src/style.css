@@ -6336,3 +6336,24 @@ body:has(> .vibe-canvas:not([hidden])) .blog-masthead {
 .bs-steps { margin-top: 12px; }
 .bs-kinds label { white-space: nowrap; font-size: 0.875rem; }
 .bs-kinds input[type="radio"] { width: 14px; height: 14px; flex: none; }
+
+/* The homepage's static summary (scripts/seo.mjs homeSummary): what a reader without JavaScript gets, and what a
+   visitor sees only while the page's code loads, before React replaces it. Plain, on the page's own ground. */
+.prerender {
+  position: relative;
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 48px 16px;
+  overflow-wrap: anywhere;
+}
+.prerender h1 {
+  margin: 0 0 12px;
+  font-size: 20px;
+}
+.prerender p,
+.prerender li {
+  color: var(--muted);
+}
+.prerender a {
+  color: var(--text);
+}

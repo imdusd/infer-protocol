@@ -8,6 +8,7 @@
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync, copyFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { Marked } from "marked";
+import { postLd } from "./seo.mjs";
 
 export const BLOG_SITE = "https://blog.imdusd.com";
 const REQUIRED = ["title", "date", "summary"];
@@ -309,7 +310,8 @@ export function renderBlog({ outDir, contentDir, site = BLOG_SITE }) {
       p.meta.summary,
       socialTags(`${site}/${p.slug}/`, p.meta.title, p.meta.summary, image, { large: card }) +
         `<meta property="article:published_time" content="${p.meta.date}" />` +
-        (p.meta.updated ? `<meta property="article:modified_time" content="${p.meta.updated}" />` : ""),
+        (p.meta.updated ? `<meta property="article:modified_time" content="${p.meta.updated}" />` : "") +
+        postLd({ url: `${site}/${p.slug}/`, title: p.meta.title, description: p.meta.summary, date: p.meta.date, updated: p.meta.updated }),
       body,
     );
   }

@@ -7,6 +7,7 @@
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync } from "node:fs";
 import { resolve, relative, dirname, posix } from "node:path";
 import { Marked } from "marked";
+import { docsLd } from "./seo.mjs";
 
 const SECTIONS = [
   ["overview", "Overview"],
@@ -291,7 +292,7 @@ export function renderDocs({ outDir, contentDir, terminal, site }) {
     // Launch values are shown as an em dash with one note per page, never spelled out inline.
     if (p.body.includes("(under consideration)")) throw Error(`${p.file}: write a pending value as — and set pending: true`);
   }
-  const PENDING_NOTE = `<p class="pending-note">A <span aria-hidden="true">—</span><span class="sr-only">dash</span> marks a value set at mainnet launch.</p>`;
+  const PENDING_NOTE = `<p class="pending-note">A <span aria-hidden="true">—</span><span class="sr-only">dash</span> marks a value not yet set.</p>`;
   const rendered = new Map(
     pages.map((p) => [p.file, p.meta.pending === "true" ? render(p).replace("</h1>", `</h1>${PENDING_NOTE}`) : render(p)]),
   );
@@ -317,7 +318,12 @@ export function renderDocs({ outDir, contentDir, terminal, site }) {
         (_, a, b) => `${a}${escapeHtml(description)}${b}`,
       )
       .replace("<!--DOCS-BODY-->", body);
-    if (site) html = html.replace("</head>", `${socialTags(site, `${site}/${dir}/`, title, description)}</head>`);
+    if (site) {
+      // A page (docs/<section>/<page>) is also described as a TechArticle about imdUSD, for search and answer engines.
+      const section = depth === 3 && SECTIONS.find(([k]) => k === dir.split("/")[1])?.[1];
+      const ld = section ? docsLd({ url: `${site}/${dir}/`, title: title.replace(/ · imdUSD docs$/, ""), description, section }) : "";
+      html = html.replace("</head>", `${socialTags(site, `${site}/${dir}/`, title, description)}${ld}</head>`);
+    }
     mkdirSync(resolve(outDir, dir), { recursive: true });
     writeFileSync(resolve(outDir, dir, "index.html"), html);
   };
@@ -397,7 +403,7 @@ const LLMS_SUMMARY = `# imdUSD
 
 > imdUSD is a stablecoin meant to be worth one US dollar, borrowed against sIMD (staked IMD, the IdentityMD token) on Ethereum. Its collateral is priced by panels of IdentityMD agents answering a fixed question, signed and checked on chain. Any holder can redeem it for $1 of sIMD less a fee, and keepers liquidate positions that fall below the minimum collateral ratio.
 
-Status: not yet launched on mainnet. Contract addresses and launch values are published at launch; in the docs a value set at launch is written as —. A listed address is not proof of a deployment: check it on chain, and check that each vault-created contract names the vault back, before integrating.
+Status: live on Ethereum mainnet (chain id 1) since 11 October 2026; the vault was deployed at block 26166417. imdUSD is \`0x61aAF8a992A3143e2B0C9cB0030b9fE702854a25\` and the vault (\`ParameterizedVault\`) is \`0x0b69F8DA8D8cE521d74Ea69a7A3475B77302EF82\`; every address is in [Contracts and addresses](https://imdusd.com/docs/reference/contracts-and-addresses/). Live figures (supply, debt, backing, bad debt, price updates) are at https://imdusd.com/stats/. Check an address on chain, and check that each vault-created contract names the vault back, before integrating.
 
 ## The protocol in brief
 
