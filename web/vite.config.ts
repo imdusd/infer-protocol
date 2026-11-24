@@ -13,7 +13,7 @@ import { renderDocs, socialTags } from "./scripts/docs-pages.mjs";
 // @ts-expect-error plain ESM build script without types
 import { inferLlms } from "./scripts/infer-llms.mjs";
 // @ts-expect-error plain ESM build script without types
-import { buildSummary, changedOn, homeLd, homeSummary, inferLd, inferSummary, statsLd, statsSummary, urlEntry, withSummary } from "./scripts/seo.mjs";
+import { buildSummary, changedOn, headingOnly, homeLd, homeSummary, inferLd, inferSummary, statsLd, statsSummary, urlEntry, withSummary } from "./scripts/seo.mjs";
 // @ts-expect-error plain ESM build script without types
 import { renderBlog } from "./scripts/blog-pages.mjs";
 import react from "@vitejs/plugin-react";
@@ -230,7 +230,10 @@ function publicSite(): Plugin {
         const appAbout = app.match(/<meta\s+name="description"\s+content="([^"]*)"/)?.[1] ?? "";
         writeFileSync(
           terminal,
-          app.replace("</head>", `${socialTags(SITE, `${SITE}/terminal/`, "imdUSD Terminal", appAbout, { type: "website" })}</head>`),
+          withSummary(
+            app.replace("</head>", `${socialTags(SITE, `${SITE}/terminal/`, "imdUSD Terminal", appAbout, { type: "website" })}</head>`),
+            headingOnly("imdUSD terminal"),
+          ),
         );
       }
       // The links page's canonical URL and social card (every public build has it).
@@ -239,7 +242,10 @@ function publicSite(): Plugin {
       const linksAbout = linksPage.match(/<meta\s+name="description"\s+content="([^"]*)"/)?.[1] ?? "";
       writeFileSync(
         links,
-        linksPage.replace("</head>", `${socialTags(SITE, `${SITE}/links/`, "imdUSD links", linksAbout, { type: "website" })}</head>`),
+        withSummary(
+          linksPage.replace("</head>", `${socialTags(SITE, `${SITE}/links/`, "imdUSD links", linksAbout, { type: "website" })}</head>`),
+          headingOnly("imdUSD links"),
+        ),
       );
       // /build/: their canonical URLs and social cards (every public build has them).
       for (const [path, title] of [

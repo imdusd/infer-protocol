@@ -533,9 +533,13 @@ export function Trade({
       aria-labelledby="trade-heading"
     >
       <header className="infer-pane-head">
-        <h1 id="trade-heading" className={compact ? "sr-only" : undefined}>
-          Trade
-        </h1>
+        {compact ? (
+          <h2 id="trade-heading" className="sr-only">
+            Trade
+          </h2>
+        ) : (
+          <h1 id="trade-heading">Trade</h1>
+        )}
         <Switch
           label="Side"
           value={side}
@@ -1030,7 +1034,7 @@ function Stake({
   return (
     <section className="infer-pane infer-stake" aria-labelledby="stake-heading">
       <header className="infer-pane-head">
-        <h1 id="stake-heading">Stake</h1>
+        <h2 id="stake-heading">Stake</h2>
         <Switch
           label="Direction"
           value={mode}

@@ -131,6 +131,9 @@ export const withSummary = (html, body) => {
   return html.replace('<div id="root"></div>', () => `<div id="root">${body}</div>`);
 };
 
+/** Only the page's heading, unseen, for a page whose own one is drawn by React: it adds nothing to the first paint. */
+export const headingOnly = (h1) => `<h1 class="sr-only">${esc(h1)}</h1>`;
+
 export const homeSummary = () =>
   summary(
     "imdUSD",
