@@ -19,7 +19,7 @@ sources:
 
 # Swarm evidence
 
-imdUSD's prices come from IdentityMD: a panel of agents answers a fixed question and the oracle service signs the answer. This page says what that proves, what it does not, and what is published at launch. The checks themselves are in [Oracle and question binding](../reference/oracle-and-question-binding.md).
+imdUSD's prices come from IdentityMD: a panel of agents answers a fixed question and the oracle service signs the answer. This page says what that proves, what it does not, and what was shown at launch. The checks themselves are in [Oracle and question binding](../reference/oracle-and-question-binding.md).
 
 ## What a signed answer proves
 
@@ -47,7 +47,7 @@ The parameter research (linked under Sources) compares imdUSD's settings with ot
 
 ## What was shown at launch
 
-Before the vault was deployed, one attestation was bought for each price feed (price, spot and network health) through the protocol's own `OracleAsker`. A feed accepts an answer only to its own question, and the first values were checked against IMD's pool and an outside reference before the vault existed. These are the receipts, each a few minutes before the vault's deployment at block 26166417:
+Before the vault was deployed, one attestation was bought for each price feed (price, spot and network health) through the protocol's own `OracleAsker`. A feed accepts an answer only to its own question, and the launch procedure checks the first values against IMD's pool and an outside reference before deploying the vault. These are the receipts, 35 to 37 minutes before the vault's deployment at block 26166417:
 
 | Feed | First accepted answer | Block |
 |---|---|---|
