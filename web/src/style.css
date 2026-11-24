@@ -17,6 +17,9 @@
   --caution: #a16207;
   --danger: #8c2f2f;
   --clear: transparent;
+  /* The CoinGecko mark's eye and pupil: white on a dark pupil in both themes, like CoinGecko's own. */
+  --mark-eye: #fffdf8;
+  --mark-pupil: #16202e;
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
@@ -33,6 +36,8 @@
   --caution: #facc15;
   --danger: #e19a9a;
   --clear: transparent;
+  --mark-eye: #fffdf8;
+  --mark-pupil: #111111;
 }
 :root {
   --fast: 150ms;
@@ -2287,12 +2292,35 @@ html.app-page body {
   padding: 0;
 }
 .coingecko-mark {
+  position: relative;
   display: block;
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
+}
+.coingecko-mark > span {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+.coingecko-body {
   background-color: currentColor;
-  -webkit-mask: url("./coingecko-mark.png") center / contain no-repeat;
-  mask: url("./coingecko-mark.png") center / contain no-repeat;
+  -webkit-mask-image: url("./coingecko-body.png");
+  mask-image: url("./coingecko-body.png");
+}
+.coingecko-eye {
+  background-color: var(--mark-eye);
+  -webkit-mask-image: url("./coingecko-eye.png");
+  mask-image: url("./coingecko-eye.png");
+}
+.coingecko-pupil {
+  background-color: var(--mark-pupil);
+  -webkit-mask-image: url("./coingecko-pupil.png");
+  mask-image: url("./coingecko-pupil.png");
 }
 @media (max-width: 720px) {
   .site-footer {
@@ -3471,7 +3499,7 @@ button.infer-go:not(:disabled):hover {
   margin-bottom: 24px;
   padding: 10px 14px;
   border: 1px solid var(--text);
-  background: var(--surface);
+  background: transparent;
   color: var(--text);
   font-size: 13px;
   text-decoration: none;
