@@ -337,8 +337,7 @@ export function renderDocs({ outDir, contentDir, terminal, site }) {
       .replace("<!--DOCS-BODY-->", body);
     if (site) {
       // A page (docs/<section>/<page>) is also described as a TechArticle about imdUSD, for search and answer engines.
-      const section = depth === 3 && SECTIONS.find(([k]) => k === dir.split("/")[1])?.[1];
-      const ld = section ? docsLd({ url: `${site}/${dir}/`, title: title.replace(/ · imdUSD docs$/, ""), description, section }) : "";
+      const ld = depth === 3 ? docsLd({ url: `${site}/${dir}/`, title: title.replace(/ · imdUSD docs$/, ""), description }) : "";
       html = html.replace("</head>", `${socialTags(site, `${site}/${dir}/`, title, description)}${ld}${extraLd}</head>`);
     }
     mkdirSync(resolve(outDir, dir), { recursive: true });

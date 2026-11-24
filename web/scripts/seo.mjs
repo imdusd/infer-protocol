@@ -74,7 +74,7 @@ export const homeLd = () =>
 export const inferLd = () => jsonLd(graph(organization, infer));
 
 /** A docs page: a TechArticle about imdUSD, inside the docs' breadcrumb trail. */
-export const docsLd = ({ url, title, description, section }) =>
+export const docsLd = ({ url, title, description }) =>
   jsonLd(
     graph({
       "@type": "TechArticle",
@@ -89,8 +89,8 @@ export const docsLd = ({ url, title, description, section }) =>
         "@type": "BreadcrumbList",
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Docs", item: `${SITE}/docs/` },
-          { "@type": "ListItem", position: 2, name: section },
-          { "@type": "ListItem", position: 3, name: title, item: url },
+          // No step for the section: it has no page of its own, and Google refuses a step without a link.
+          { "@type": "ListItem", position: 2, name: title, item: url },
         ],
       },
     }),
