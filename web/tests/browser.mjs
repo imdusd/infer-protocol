@@ -2104,8 +2104,8 @@ try {
     const doors = Object.fromEntries(await page.locator(".audiences-grid a").evaluateAll((as) => as.map((a) => [a.querySelector("h3").textContent, a.getAttribute("href")])));
     assert.deepEqual(doors, { "Borrowers →": `${url}terminal/`, "Builders →": `${url}build/`, "Partners →": `${url}build/#partners` }, "the homepage's three doors");
     assert.deepEqual(
-      await page.locator(".site-nav a").allTextContents(),
-      ["Terminal", "Build", "Stats", "Docs", "INFER ↗"],
+      await page.locator(".site-nav a").evaluateAll((as) => as.map((a) => a.getAttribute("aria-label") ?? a.textContent)),
+      ["Terminal", "Build", "Stats", "Docs", "INFER (opens in a new tab)"],
       "the header's links, in order",
     );
     await page.locator(".site-nav").getByRole("link", { name: "Build" }).click();
