@@ -7,7 +7,7 @@
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync } from "node:fs";
 import { resolve, relative, dirname, posix } from "node:path";
 import { Marked } from "marked";
-import { docsLd } from "./seo.mjs";
+import { changedOn, docsIndexLd, docsLd, faqLd, urlEntry } from "./seo.mjs";
 
 const SECTIONS = [
   ["overview", "Overview"],
@@ -99,6 +99,23 @@ function walk(dir, base = dir) {
     return statSync(p).isDirectory() ? walk(p, base) : n.endsWith(".md") ? [relative(base, p)] : [];
   });
 }
+
+/** A page's questions (its ## headings) and answers, as plain text, for FAQPage structured data. */
+export const questions = (md) =>
+  md
+    .split(/^## /m)
+    .slice(1)
+    .map((part) => {
+      const [question, ...rest] = part.split("\n");
+      const answer = rest
+        .join(" ")
+        .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+        .replace(/[*`]/g, "")
+        .replace(/(^|\s)- /g, "$1")
+        .replace(/\s+/g, " ")
+        .trim();
+      return { question: question.trim(), answer };
+    });
 
 /** Path from one docs page directory to another, both relative to the site root, ending in "/". */
 const linkBetween = (fromDir, toDir) => {
@@ -306,7 +323,7 @@ export function renderDocs({ outDir, contentDir, terminal, site }) {
     }
   }
 
-  const page = (dir, title, description, body) => {
+  const page = (dir, title, description, body, extraLd = "") => {
     const depth = dir.split("/").length; // docs = 1, docs/a/b = 3
     const up = "../".repeat(depth);
     let html = template;
@@ -322,7 +339,7 @@ export function renderDocs({ outDir, contentDir, terminal, site }) {
       // A page (docs/<section>/<page>) is also described as a TechArticle about imdUSD, for search and answer engines.
       const section = depth === 3 && SECTIONS.find(([k]) => k === dir.split("/")[1])?.[1];
       const ld = section ? docsLd({ url: `${site}/${dir}/`, title: title.replace(/ · imdUSD docs$/, ""), description, section }) : "";
-      html = html.replace("</head>", `${socialTags(site, `${site}/${dir}/`, title, description)}${ld}</head>`);
+      html = html.replace("</head>", `${socialTags(site, `${site}/${dir}/`, title, description)}${ld}${extraLd}</head>`);
     }
     mkdirSync(resolve(outDir, dir), { recursive: true });
     writeFileSync(resolve(outDir, dir, "index.html"), html);
@@ -358,7 +375,7 @@ export function renderDocs({ outDir, contentDir, terminal, site }) {
       footer(p.dir);
     const desc = summary(p.body);
     const safeDesc = redact && (REDACT_WHOLE.has(p.file) || TERMINAL_RE.test(desc)) ? "" : desc;
-    page(p.dir, `${titleText(p.meta.title, redact)} · imdUSD docs`, safeDesc || `imdUSD docs: ${titleText(p.meta.title, redact)}`, body);
+    page(p.dir, `${titleText(p.meta.title, redact)} · imdUSD docs`, safeDesc || `imdUSD docs: ${titleText(p.meta.title, redact)}`, body, p.meta.faq === "true" ? faqLd(questions(p.body)) : "");
   });
 
   const index =
@@ -379,14 +396,19 @@ export function renderDocs({ outDir, contentDir, terminal, site }) {
     nav("docs") +
     `</main>` +
     footer("docs");
-  page("docs", "imdUSD docs", "How imdUSD works: borrowing, redemption, liquidation, the swarm oracle and the contracts.", index);
+  page("docs", "imdUSD docs", "How imdUSD works: borrowing, redemption, liquidation, the swarm oracle and the contracts.", index, docsIndexLd("How imdUSD works: borrowing, redemption, liquidation, the swarm oracle and the contracts."));
   if (site) {
     // Every public page but the redacted one, which is not for crawlers until it has content.
-    const urls = ["", ...(terminal ? ["stats/"] : []), "build/", "links/", "docs/", ...pages.filter((p) => !(redact && REDACT_WHOLE.has(p.file))).map((p) => `${p.dir}/`)];
+    const urls = [
+      ...["", ...(terminal ? ["stats/"] : []), "build/", "links/", "docs/"].map((u) => urlEntry(`${site}/${u}`)),
+      ...pages
+        .filter((p) => !(redact && REDACT_WHOLE.has(p.file)))
+        .map((p) => urlEntry(`${site}/${p.dir}/`, changedOn(resolve(contentDir, p.file)))),
+    ];
     writeFileSync(
       resolve(outDir, "sitemap.xml"),
       `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
-        urls.map((u) => `  <url><loc>${site}/${u}</loc></url>`).join("\n") +
+        urls.join("\n") +
         `\n</urlset>\n`,
     );
     writeLlms({ outDir, pages, site, redact });
@@ -506,12 +528,12 @@ export function socialTags(site, url, title, description, { type = "article" } =
     `<meta property="og:url" content="${e(url)}" />` +
     `<meta property="og:title" content="${e(title)}" />` +
     `<meta property="og:description" content="${e(description)}" />` +
-    `<meta property="og:image" content="${e(site)}/icon-512.png" />` +
-    `<meta property="og:image:width" content="512" />` +
-    `<meta property="og:image:height" content="512" />` +
-    `<meta name="twitter:card" content="summary" />` +
+    `<meta property="og:image" content="${e(site)}/share.png" />` +
+    `<meta property="og:image:width" content="1200" />` +
+    `<meta property="og:image:height" content="630" />` +
+    `<meta name="twitter:card" content="summary_large_image" />` +
     `<meta name="twitter:title" content="${e(title)}" />` +
     `<meta name="twitter:description" content="${e(description)}" />` +
-    `<meta name="twitter:image" content="${e(site)}/icon-512.png" />`
+    `<meta name="twitter:image" content="${e(site)}/share.png" />`
   );
 }
