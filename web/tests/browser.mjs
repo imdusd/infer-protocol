@@ -2105,7 +2105,7 @@ try {
     assert.deepEqual(doors, { "Borrowers →": `${url}terminal/`, "Builders →": `${url}build/`, "Partners →": `${url}build/#partners` }, "the homepage's three doors");
     assert.deepEqual(
       await page.locator(".site-nav a").allTextContents(),
-      ["Terminal", "Stats", "Build", "Docs", "INFER ↗"],
+      ["Terminal", "Build", "Stats", "Docs", "INFER ↗"],
       "the header's links, in order",
     );
     await page.locator(".site-nav").getByRole("link", { name: "Build" }).click();
