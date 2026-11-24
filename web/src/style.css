@@ -3455,6 +3455,38 @@ button.infer-go:not(:disabled):hover {
 .infer-doc {
   max-width: 1040px;
 }
+/* The page's banner (Season 1 on /tokenomics): one line, the whole strip a link down the page. */
+.infer-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  padding: 10px 14px;
+  border: 1px solid var(--text);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  text-decoration: none;
+}
+.infer-banner:hover .infer-banner-go,
+.infer-banner:focus-visible .infer-banner-go {
+  transform: translateY(2px);
+}
+.infer-banner-dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--live);
+}
+.infer-banner-go {
+  margin-inline-start: auto;
+  transition: transform 0.15s;
+}
+/* Clear of the sticky masthead, which wraps to two rows (about 120px) on phones. */
+#seasons {
+  scroll-margin-top: 150px;
+}
 .infer-doc-head {
   padding-bottom: 24px;
   border-bottom: 2px solid var(--text);
